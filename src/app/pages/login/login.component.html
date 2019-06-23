@@ -5,7 +5,7 @@
       <!--<img *ngFor="let flag of flags" [src]="'assets/imgs/flags/'+ flag +'.png'" alt="flag"/>-->
     </div>
     <form #f="ngForm" (ngSubmit)="onSubmit(f)" id="login-form" name="f" role="form">
-      <span *ngIf="showError" class="error">Nom de compte ou mot de passe incorrect.</span>
+      <span *ngIf="error && error != ''" class="error">{{error}}</span>
       <input [ngClass]="{'red-border': showError}"
              autofocus="autofocus"
              id="username" name="username"
@@ -32,9 +32,10 @@
       </div>
       <button id="login-btn" ng-summit type="submit">login</button>
     </form>
-    <nav routerLinkActive="active"><a class="other-label" routerLink="/signup" routerLinkActive="active">Inscription</a></nav>
+    <nav routerLinkActive="active"><a class="other-label" routerLink="/signup" routerLinkActive="active">Inscription</a>
+    </nav>
   </div>
 </div>
-<footer id="footer" class="row">
+<footer class="row" id="footer">
   <p>Copyright © Kiabi - {{ version }} - <span class="digilab">With Love By Digital Lab</span></p>
 </footer>

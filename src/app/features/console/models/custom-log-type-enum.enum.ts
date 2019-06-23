@@ -1,3 +1,6 @@
+/**
+ * Author : Mehdi Aarab
+ */
 export enum CustomLogTypeEnum {
   INFO = 'info',
   WARN = 'warn',

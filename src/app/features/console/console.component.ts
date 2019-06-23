@@ -1,5 +1,5 @@
-import {Component, Input, OnChanges, OnInit} from '@angular/core';
-import {ChatServerMessage} from '../../models/packets/ChatServerMessage';
+import {Component, Input, OnInit} from '@angular/core';
+import {CustomLog} from './models/custom-log';
 
 @Component({
   selector: 'app-console',
@@ -8,7 +8,7 @@ import {ChatServerMessage} from '../../models/packets/ChatServerMessage';
 })
 export class ConsoleComponent implements OnInit {
 
-  @Input() private logs: ChatServerMessage[] = [];
+  @Input() public logs: CustomLog[] = [];
 
 
   constructor() {
@@ -17,7 +17,6 @@ export class ConsoleComponent implements OnInit {
   ngOnInit() {
 
   }
-
 
 
 }

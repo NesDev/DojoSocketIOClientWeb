@@ -1,134 +1,133 @@
-import { Injectable } from '@angular/core';
-import { SocketManager } from '../utils/socketManager';
+import {Injectable} from '@angular/core';
+import {SocketManager} from '../utils/socketManager';
 import debug from 'debug';
-import { UserInformations } from '../models/types/userInformations';
-import { ChatServerMessage } from '../models/packets/ChatServerMessage';
+import {UserInformations} from '../models/types/userInformations';
+import {ChatServerMessage} from '../models/packets/ChatServerMessage';
+import {Socket} from 'ngx-socket-io';
+import {Dispatcher} from '../utils/events/dispatcher';
+import {CreateAccountSuccesMessage} from '../models/packets/CreateAccountSuccesMessage';
+import {IdentificationRequestMessage} from '../models/packets/IdentificationRequestMessage';
+import {IdentificationTypeEnum} from '../models/enums/IdentificationTypeEnum';
+import {IdentificationSucessMessage} from '../models/packets/IdentificationSucessMessage';
+import {IdentificationFailedMessage} from '../models/packets/IdentificationFailedMessage';
+import {UserInformations} from '../models/types/UserInformations';
+import {CreateAccountErrorMessage} from '../models/packets/CreateAccountErrorMessage';
+import {CreateAccountRequestMessage} from '../models/packets/CreateAccountRequestMessage';
+import {ServerInformationsMessage} from '../models/packets/ServerInformationsMessage';
+import {UserDisconnectedMessage} from '../models/packets/UserDisconnectedMessage';
+import {UserConnectedMessage} from '../models/packets/UserConnectedMessage';
 
 const log = debug('dojo:socketService');
 
 @Injectable({
   providedIn: 'root',
 })
-export class SocketService {
+export class SocketService extends Dispatcher {
   public identified = false;
   public isInit = false;
   public logs: ChatServerMessage[] = [];
-  private socket: SocketManager;
+  public users: UserInformations[] = [];
+  public socket: SocketManager;
   private userInformations: UserInformations;
 
-  constructor() {
+  constructor(private socketService: Socket) {
+    super();
+    log(socketService);
     log('Initialisation');
     debug.enable('dojo:*');
-    // this.socket = new SocketManager(socketService);
-    // this.socket.dispatchers.push(this);
-    // this.init().then(() => {
-    //   this.isInit = true;
-    // });
+    this.socket = new SocketManager(socketService);
+    this.socket.dispatchers.push(this);
+    this.init().then(() => {
+      this.isInit = true;
+    });
   }
 
-  // init(): Promise<boolean> {
-  //   return new Promise<boolean>(async (resolve, reject) => {
-  //     this.monitorPackets();
-  //     const login = localStorage.login;
-  //     const password = localStorage.password;
-  //     if (login && password) {
-  //       await this.connectToServer(login, password);
-  //     }
-  //     return resolve(true);
-  //   });
-  // }
-  //
-  //
-  // public monitorPackets() {
-  //   const wrapper = this.wrap();
-  //   wrapper.on('socket::disconnected', () => {
-  //     log('Socket disconnected');
-  //     this.identified = false;
-  //   });
-  //   wrapper.on('socket::reconnected', () => {
-  //     this.identified = false;
-  //     log('Reconnected, Identification..');
-  //     const login = localStorage.login;
-  //     const password = localStorage.password;
-  //     if (login && password) {
-  //       const wrapperIdenti = this.wrap();
-  //       wrapperIdenti.on('packet::IdentificationSucessMessage', (packet: IdentificationSucessMessage) => {
-  //         localStorage.login = packet.userInformations.login;
-  //         localStorage.password = packet.userInformations.password;
-  //         log('ReIdentification sucess ! ', packet.userInformations);
-  //         this.userInformations = packet.userInformations;
-  //         this.emit('event::Identified');
-  //         this.identified = true;
-  //         wrapperIdenti.done();
-  //       });
-  //       this.socket.send('IdentificationRequestMessage', {
-  //         login: 'nes',
-  //         password: 'toto',
-  //         type: IdentificationTypeEnum.CLIENT
-  //       } as IdentificationRequestMessage);
-  //     }
-  //   });
-  // }
-  //
-  // public connectToServer(login: string, password: string): Promise<{ state: boolean, reason: string }> {
-  //   return new Promise<{ state: boolean, reason: string }>(async (resolve, reject) => {
-  //     const wrapper = this.wrap();
-  //     // TIMEOUT CONNECTION
-  //     const timeoutConnection = setTimeout(() => {
-  //       log('Timeout: no responds from the server for server connection, socketClientManager is ' +
-  //       (this.socket && this.socket.isConnected()) ? 'connected' : 'disconnected');
-  //       this.socket.disconnect('TIMEOUT SERVER');
-  //       wrapper.done();
-  //       return resolve({ state: false, reason: 'Timeout' });
-  //     }, 25000);
-  //     // FAIL CONNECTION
-  //     wrapper.on('packet::IdentificationFailedMessage', (packet: IdentificationFailedMessage) => {
-  //       log('Identification failed ! ', packet.reason);
-  //       this.socket.disconnect('Connection Supervisor Failed: ' + packet.reason);
-  //       clearTimeout(timeoutConnection);
-  //       wrapper.done();
-  //       return resolve({ state: false, reason: packet.reason });
-  //     });
-  //     // GOOD CONNECTION
-  //     wrapper.on('packet::IdentificationSucessMessage', (packet: IdentificationSucessMessage) => {
-  //       this.identified = true;
-  //       localStorage.login = packet.userInformations.login;
-  //       localStorage.password = packet.userInformations.password;
-  //       log('Identification sucess ! ', packet.userInformations);
-  //       this.userInformations = packet.userInformations;
-  //       this.emit('event::Identified');
-  //       wrapper.done();
-  //       clearTimeout(timeoutConnection);
-  //       return resolve({ state: true, reason: 'OK' });
-  //     });
-  //     // GOOD CONNECTION
-  //     wrapper.on('socket::connected', (packet: IdentificationSucessMessage) => {
-  //       log('Identification..');
-  //       this.socket.send('IdentificationRequestMessage', {
-  //         login,
-  //         password,
-  //         type: IdentificationTypeEnum.CLIENT
-  //       } as IdentificationRequestMessage);
-  //     });
-  //     wrapper.on('socket::disconnected', () => {
-  //       log('Server disconnected..');
-  //       wrapper.done();
-  //       clearTimeout(timeoutConnection);
-  //       return resolve({ state: false, reason: 'Server disconnected' });
-  //     });
-  //   });
-  // }
-  //
-  //
-  // createAccount(): Promise<{ result: boolean, reason: string }> {
-  //   return new Promise<{ result: boolean, reason: string }>((resolve, reject) => {
-  //     const wrapper = this.wrap();
-  //     wrapper.on('packet::CreateAccountSuccessMessage', (packet: CreateAccountSuccessMessage) => {
-  //       wrapper.done();
-  //     });
-  //
-  //     return resolve({ result: true, reason: 'OK' });
-  //   });
-  // }
+  init(): Promise<boolean> {
+    return new Promise<boolean>(async (resolve, reject) => {
+      this.monitorPackets();
+      const login = localStorage.login;
+      const password = localStorage.password;
+      if (login && password) {
+        await this.connectToServer(login, password);
+      }
+      return resolve(true);
+    });
+  }
 
+  public monitorPackets() {
+    const wrapper = this.wrap();
+    wrapper.on('socket::disconnected', () => {
+      alert('Socket disconnect');
+      log('Socket disconnected');
+      this.identified = false;
+    });
+    wrapper.on('packet::IdentificationSucessMessage', (packet: IdentificationSucessMessage) => {
+      this.identified = true;
+      this.userInformations = packet.userInformations;
+    });
+    wrapper.on('packet::ServerInformationsMessage', (packet: ServerInformationsMessage) => {
+      this.users = packet.users;
+    });
+
+    wrapper.on('packet::UserDisconnectedMessage', (packet: UserDisconnectedMessage) => {
+      this.users = this.users.filter((elt) => elt.login !== packet.login);
+    });
+
+    wrapper.on('packet::UserConnectedMessage', (packet: UserConnectedMessage) => {
+      const userIndex = this.users.findIndex((elt) => elt.login === packet.userInformations.login);
+      if (userIndex !== -1) {
+        this.users = this.users.filter((elt) => elt.login !== packet.userInformations.login);
+      }
+      this.users.push(packet.userInformations);
+    });
+  }
+
+  public createAccount(login: string, password: string): Promise<{ result: boolean, reason: string }> {
+    return new Promise<{ result: boolean, reason: string }>((resolve, reject) => {
+      const wrapper = this.wrap();
+      const timeout = setTimeout(() => {
+        wrapper.done();
+        return resolve({result: false, reason: 'TIMEOUT'});
+      }, 10000);
+      wrapper.on('packet::CreateAccountSuccesMessage', (packet: CreateAccountSuccesMessage) => {
+        clearTimeout(timeout);
+        wrapper.done();
+        return resolve({result: true, reason: 'OK'});
+      });
+      wrapper.on('packet::CreateAccountErrorMessage', (packet: CreateAccountErrorMessage) => {
+        clearTimeout(timeout);
+        wrapper.done();
+        return resolve({result: false, reason: packet.reason});
+      });
+      this.socket.send('CreateAccountRequestMessage', {
+        login,
+        password
+      } as CreateAccountRequestMessage);
+    });
+  }
+
+  public login(login: string, password: string): Promise<{ result: boolean, reason: string }> {
+    return new Promise<{ result: boolean, reason: string }>((resolve, reject) => {
+      const wrapper = this.wrap();
+      const timeout = setTimeout(() => {
+        wrapper.done();
+        return resolve({result: false, reason: 'TIMEOUT'});
+      }, 10000);
+      wrapper.on('packet::IdentificationSucessMessage', (packet: IdentificationSucessMessage) => {
+        clearTimeout(timeout);
+        wrapper.done();
+        return resolve({result: true, reason: 'OK'});
+      });
+      wrapper.on('packet::IdentificationFailedMessage', (packet: IdentificationFailedMessage) => {
+        clearTimeout(timeout);
+        wrapper.done();
+        return resolve({result: false, reason: packet.reason});
+      });
+      this.socket.send('IdentificationRequestMessage', {
+        login,
+        password,
+        type: IdentificationTypeEnum.CLIENT
+      } as IdentificationRequestMessage);
+    });
+  }
 }

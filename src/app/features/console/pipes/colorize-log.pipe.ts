@@ -1,6 +1,9 @@
 import {Pipe, PipeTransform} from '@angular/core';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 
+/**
+ * Author : Mehdi Aarab
+ */
 @Pipe({
   name: 'colorizeLog'
 })

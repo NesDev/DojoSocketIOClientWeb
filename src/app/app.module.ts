@@ -1,27 +1,25 @@
-import { RouterModule } from '@angular/router';
-import { LoginModule } from './pages/login/login.module';
-import { SignupModule } from './pages/signup/signup.module';
-import { NgModule } from '@angular/core';
-import { MatInputModule } from '@angular/material';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { BrowserModule } from '@angular/platform-browser';
-import { SocketIoConfig } from 'ngx-socket-io';
-import { AppComponent } from './app.component';
-import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
-import { UserListComponent } from './pages/user-list/user-list.component';
-import { ROUTES } from './app.routes';
-import { SocketManagerModule } from './service/socket-manager/socket-manager.module';
+import {RouterModule} from '@angular/router';
+import {LoginModule} from './pages/login/login.module';
+import {SignupModule} from './pages/signup/signup.module';
+import {NgModule} from '@angular/core';
+import {MatInputModule} from '@angular/material';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {BrowserModule} from '@angular/platform-browser';
+import {SocketIoConfig, SocketIoModule} from 'ngx-socket-io';
+import {AppComponent} from './app.component';
+import {platformBrowserDynamic} from '@angular/platform-browser-dynamic';
+import {ROUTES} from './app.routes';
+import {ChatModule} from './pages/chat/chat.module';
 
-const config: SocketIoConfig = { url: 'http://127.0.0.1:8001', options: {} };
+const config: SocketIoConfig = {url: 'http://127.0.0.1:8001', options: {}};
 
 @NgModule({
   declarations: [
     AppComponent,
-    UserListComponent,
   ],
   imports: [
-    SocketManagerModule.forRoot(),
+    SocketIoModule.forRoot(config),
     LoginModule,
     SignupModule,
     BrowserModule,
@@ -31,10 +29,12 @@ const config: SocketIoConfig = { url: 'http://127.0.0.1:8001', options: {} };
     ReactiveFormsModule,
     RouterModule,
     BrowserAnimationsModule,
+    ChatModule,
     RouterModule.forRoot(ROUTES),
-    // SocketIoModule.forRoot(config)
   ],
   providers: [],
+  exports: [
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule {

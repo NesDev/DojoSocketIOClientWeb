@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
+import {SocketService} from '../../../service/socket.service';
 
 @Component({
   selector: 'app-user-list',
@@ -6,10 +7,13 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./user-list.component.scss']
 })
 export class UserListComponent implements OnInit {
+  public Math = Math;
 
-  constructor() { }
+  constructor(private socket: SocketService) {
+  }
 
   ngOnInit() {
   }
+
 
 }

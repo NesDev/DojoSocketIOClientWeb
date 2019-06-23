@@ -1,6 +1,7 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { SocketService } from '../../service/socket.service';
-import { NgForm } from '@angular/forms';
+import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {SocketService} from '../../service/socket.service';
+import {NgForm} from '@angular/forms';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-signup',
@@ -10,29 +11,23 @@ import { NgForm } from '@angular/forms';
 export class SignupComponent implements OnInit {
   @ViewChild('password') password: ElementRef;
 
-  public lang: string;
-  public flags = ['fr', 'it', 'br', 'ru', 'en'];
   public version: string;
   public error = '';
 
-  constructor(public socketService: SocketService) {
+  constructor(public socketService: SocketService, private router: Router) {
   }
 
   ngOnInit() {
-    this.lang = this.getHomeLanguage();
   }
 
-  onSubmit(f: NgForm) {
-    // this.authenticationService.login(f.form.value.username, f.form.value.password).subscribe(
-    //   (success) => {
-    //     console.log(success);
-    //     this.router.navigateByUrl('home');
-    //   },
-    //   (error) => {
-    //     console.log(error);
-    //     this.showError = true;
-    //   }
-    // );
+  async onSubmit(f: NgForm) {
+    const result = await this.socketService.createAccount(f.form.value.username, f.form.value.password);
+    if (result.result) {
+      await this.router.navigateByUrl('');
+    } else {
+      console.log(result.reason);
+      this.error = result.reason;
+    }
   }
 
   showPassword() {
@@ -41,22 +36,5 @@ export class SignupComponent implements OnInit {
 
   hidePassword() {
     this.password.nativeElement.setAttribute('type', 'password');
-  }
-
-  private getHomeLanguage(): string {
-    const userLang = navigator.language;
-    if (userLang.indexOf('en') !== -1) {
-      return 'en';
-    } else if (userLang.indexOf('ru') !== -1) {
-      return 'ru';
-    } else if (userLang.indexOf('it') !== -1) {
-      return 'it';
-    } else if (userLang.indexOf('br') !== -1 || userLang.indexOf('pt') !== -1) {
-      return 'br';
-    } else if (userLang.indexOf('fr') !== -1) {
-      return 'fr';
-    } else {
-      return 'fr';
-    }
   }
 }
