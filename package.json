@@ -25,7 +25,7 @@
     "core-js": "^2.5.4",
     "debug": "^4.1.1",
     "events": "^3.0.0",
-    "moment": "^2.24.0",
+    "moment": "^2.29.2",
     "ngx-auto-scroll": "^1.1.0",
     "ngx-socket-io": "^2.1.1",
     "querystring": "^0.2.0",
